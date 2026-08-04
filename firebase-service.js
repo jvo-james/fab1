@@ -39,46 +39,63 @@ export async function subscribeSlotLocks(
 ) {
   const services = await getServices();
 
-  if (!services) {
-    return () => {};
-  }
+  if (!services) return () => {};
 
-  const { db, firestoreModule: f } =
-    services;
+  const { db, firestoreModule: f } = services;
 
-  // Ordering is unnecessary because consumers index records by document
-  // ID. Omitting orderBy also avoids an avoidable Firestore index failure.
-  const query = f.query(
-    f.collection(db, 'slotLocks'),
-    f.where('date', '>=', startDate),
-    f.where('date', '<=', endDate)
-  );
+  const normaliseRegion = (value) => {
+    const region = String(value || '').trim().toLowerCase();
+    if (['greater-manchester', 'manchester', 'greater_manchester'].includes(region)) return 'greater-manchester';
+    if (['london-luton', 'london', 'luton', 'london_luton'].includes(region)) return 'london-luton';
+    return '';
+  };
 
+  const normaliseSlotId = (data = {}, documentId = '') => {
+    const raw = String(data.slotId || data.start || data.label || '').trim();
+    const match = raw.match(/^([01]\d|2[0-3])[:\-]([0-5]\d)$/);
+    if (match) return `${match[1]}-${match[2]}`;
+
+    const idMatch = String(documentId).match(/(?:^|_)([01]\d)[-:]([0-5]\d)$/);
+    return idMatch ? `${idMatch[1]}-${idMatch[2]}` : raw.replace(':', '-');
+  };
+
+  // Read the collection and filter client-side. This deliberately avoids
+  // depending on old document-ID formats or a Firestore query/index state.
   return f.onSnapshot(
-    query,
+    f.collection(db, 'slotLocks'),
     (snapshot) => {
       const nextLocks = new Map();
 
       snapshot.forEach((document) => {
-        nextLocks.set(document.id, {
-          id: document.id,
-          ...document.data()
-        });
+        const data = document.data() || {};
+        const date = String(data.date || '').trim();
+        if (!date || date < startDate || date > endDate) return;
+
+        const slotId = normaliseSlotId(data, document.id);
+        if (!slotId) return;
+
+        const status = data.status === 'open' ? 'available' : data.status;
+        const record = { id: document.id, ...data, date, slotId, status };
+        const region = normaliseRegion(data.region);
+
+        // Always retain the real document ID for admin/debug use.
+        nextLocks.set(document.id, record);
+
+        if (region) {
+          nextLocks.set(`${region}_${date}_${slotId}`, record);
+        } else {
+          // Legacy records had no region. Make them visible in both regions
+          // until the admin saves that date again with the current editor.
+          nextLocks.set(`greater-manchester_${date}_${slotId}`, record);
+          nextLocks.set(`london-luton_${date}_${slotId}`, record);
+        }
       });
 
       callback(nextLocks);
     },
     (error) => {
-      console.error(
-        'Availability subscription failed:',
-        error
-      );
-
-      // Do not replace existing availability with an
-      // empty map because of a temporary connection error.
-      if (typeof onError === 'function') {
-        onError(error);
-      }
+      console.error('Availability subscription failed:', error);
+      if (typeof onError === 'function') onError(error);
     }
   );
 }
