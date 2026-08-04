@@ -4,7 +4,7 @@ const { getAdmin } = require('./lib/firebase-admin');
 async function sendEmailJS(booking) {
   const { EMAILJS_SERVICE_ID, EMAILJS_BOOKING_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_ADMIN_EMAIL } = process.env;
   if (!EMAILJS_SERVICE_ID || !EMAILJS_BOOKING_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return;
-  const details = `Reference: ${booking.reference}\nService: ${booking.service}\nDate: ${booking.date}\nStart time: ${booking.start || String(booking.time_slot || '').replace('-', ':')}\nEstimated finish: ${booking.end || 'To be confirmed'}\nDeposit paid: £25\nActual service price: to be communicated after review`;
+  const details = `Reference: ${booking.reference}\nService: ${booking.service}\nDate: ${booking.date}\nPrimary start time: ${booking.start || String(booking.time_slot || '').replace('-', ':')}\nOther preferred times: ${(booking.preferredStartTimes || []).filter(time => time !== booking.start).join(', ') || 'None'}\nEstimated finish: ${booking.end || 'To be confirmed'}\nDeposit paid: £25\nActual service price: to be communicated after review`;
   const common = { ...booking, submission_type: 'booking', submission_label: 'Paid booking deposit', reference: booking.reference, user_name: `${booking.first_name} ${booking.last_name}`.trim(), user_email: booking.email, admin_email: EMAILJS_ADMIN_EMAIL || '', reply_to: booking.email, details, message: details, deposit_amount: '£25', payment_status: 'Deposit paid', actual_price_note: 'The actual service price will be communicated after the booking details are reviewed.' };
   const recipients = [
     { ...common, to_email: EMAILJS_ADMIN_EMAIL, to_name: "FAUSTINA'S SPARKLY SERVICES", recipient_type: 'admin', email_subject: `£25 deposit paid — ${booking.reference}` },
