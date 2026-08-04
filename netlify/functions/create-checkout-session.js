@@ -13,36 +13,35 @@ exports.handler = async (event) => {
     const admin = getAdmin();
     const db = admin.firestore();
     const bookingRef = db.collection('bookingRequests').doc();
-    const lockRef = db.collection('slotLocks').doc(`${booking.region}_${booking.date}_${booking.time_slot}`);
+    const lockRefs = booking.occupiedSlotIds.map(slotId => db.collection('slotLocks').doc(`${booking.region}_${booking.date}_${slotId}`));
     const holdUntil = admin.firestore.Timestamp.fromMillis(Date.now() + 35 * 60 * 1000);
 
     await db.runTransaction(async transaction => {
-      const lockSnap = await transaction.get(lockRef);
-      if (!lockSnap.exists) throw new Error('SLOT_UNAVAILABLE');
-      const lockData = lockSnap.data() || {};
-      const expiredHold = lockData.status === 'hold' && lockData.expiresAt?.toMillis?.() <= Date.now();
-      if (lockData.status !== 'available' && !expiredHold) throw new Error('SLOT_UNAVAILABLE');
+      const snapshots = await Promise.all(lockRefs.map(ref => transaction.get(ref)));
+      snapshots.forEach(snapshot => {
+        if (!snapshot.exists) throw new Error('SLOT_UNAVAILABLE');
+        const data = snapshot.data() || {};
+        const expiredHold = data.status === 'hold' && data.expiresAt?.toMillis?.() <= Date.now();
+        if (data.status !== 'available' && !expiredHold) throw new Error('SLOT_UNAVAILABLE');
+      });
       transaction.set(bookingRef, {
         ...booking,
-        status: 'awaiting_deposit',
-        paymentStatus: 'pending',
-        depositStatus: 'pending',
-        depositAmount: 25,
-        balanceStatus: 'price_to_be_communicated',
-        finalPrice: null,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        holdUntil
+        status: 'awaiting_deposit', paymentStatus: 'pending', depositStatus: 'pending', depositAmount: 25,
+        balanceStatus: 'price_to_be_communicated', finalPrice: null,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(), holdUntil
       });
-      transaction.set(lockRef, { ...lockSnap.data(), status: 'hold', bookingId: bookingRef.id, expiresAt: holdUntil, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      lockRefs.forEach((ref, index) => transaction.set(ref, {
+        ...snapshots[index].data(), status: 'hold', bookingId: bookingRef.id,
+        bookingStart: booking.start, bookingEnd: booking.end, expiresAt: holdUntil,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }));
     });
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     let session;
     try {
       session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        currency: 'gbp',
-        customer_email: booking.email,
+        mode: 'payment', currency: 'gbp', customer_email: booking.email,
         line_items: [{ quantity: 1, price_data: { currency: 'gbp', unit_amount: DEPOSIT_PENCE, product_data: { name: 'Cleaning booking deposit', description: `£25 deposit for booking ${booking.reference}. The actual service price will be communicated after review.` } } }],
         payment_intent_data: { description: `Booking deposit ${booking.reference}`, metadata: { bookingId: bookingRef.id, reference: booking.reference } },
         metadata: { bookingId: bookingRef.id, reference: booking.reference },
@@ -52,8 +51,12 @@ exports.handler = async (event) => {
       });
     } catch (error) {
       await db.runTransaction(async transaction => {
-        const lockSnap = await transaction.get(lockRef);
-        if (lockSnap.exists && lockSnap.data()?.bookingId === bookingRef.id) transaction.set(lockRef, { ...lockSnap.data(), status: 'available', bookingId: admin.firestore.FieldValue.delete(), expiresAt: admin.firestore.FieldValue.delete(), updatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        const snapshots = await Promise.all(lockRefs.map(ref => transaction.get(ref)));
+        snapshots.forEach((snap, index) => {
+          if (snap.exists && snap.data()?.bookingId === bookingRef.id) transaction.set(lockRefs[index], {
+            status: 'available', bookingId: admin.firestore.FieldValue.delete(), bookingStart: admin.firestore.FieldValue.delete(), bookingEnd: admin.firestore.FieldValue.delete(), expiresAt: admin.firestore.FieldValue.delete(), updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        });
         transaction.update(bookingRef, { status: 'payment_setup_failed', paymentStatus: 'failed', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
       });
       throw error;
@@ -63,7 +66,7 @@ exports.handler = async (event) => {
     return json(200, { checkoutUrl: session.url });
   } catch (error) {
     console.error('create-checkout-session', error);
-    const known = ['SLOT_UNAVAILABLE','TERMS_REQUIRED','MISSING_REQUIRED_DETAILS','INVALID_BOOKING_OPTION','INVALID_DATE','INVALID_EMAIL','DETAIL_TOO_LONG'];
+    const known = ['SLOT_UNAVAILABLE','TERMS_REQUIRED','MISSING_REQUIRED_DETAILS','INVALID_BOOKING_OPTION','INVALID_DATE','INVALID_EMAIL','DETAIL_TOO_LONG','INVALID_START_TIME','TIME_OUTSIDE_OPENING_HOURS'];
     return json(known.includes(error.message) ? 400 : 500, { error: known.includes(error.message) ? error.message : 'CHECKOUT_FAILED' });
   }
 };
