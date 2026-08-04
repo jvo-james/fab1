@@ -655,3 +655,76 @@ body.nav-open:before{content:"";position:fixed;inset:0;background:rgba(12,30,10,
 .booking-panel[data-step="2"] .time-slot small{text-align:center!important;line-height:1.25!important}
 @media(max-width:760px){.booking-panel[data-step="2"] .time-slot-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:420px){.booking-panel[data-step="2"] .time-slot-list{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}.booking-panel[data-step="2"] .time-slot>span{min-height:64px!important;padding:10px 6px!important}.booking-panel[data-step="2"] .time-slot small{font-size:.56rem!important}}
+
+/* Keep all five booking steps in one straight horizontal line */
+.booking-progress,
+.booking-steps,
+.steps-nav,
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+  width: 100%;
+  gap: 0;
+}
+
+/* Each individual step */
+.booking-progress .step,
+.booking-steps .step,
+.steps-nav .step,
+.stepper .step {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+}
+
+/* Step number */
+.booking-progress .step-number,
+.booking-steps .step-number,
+.steps-nav .step-number,
+.stepper .step-number {
+  flex: 0 0 auto;
+}
+
+/* Step label */
+.booking-progress .step-label,
+.booking-steps .step-label,
+.steps-nav .step-label,
+.stepper .step-label {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile: still keep all five on one line */
+@media (max-width: 600px) {
+  .booking-progress,
+  .booking-steps,
+  .steps-nav,
+  .stepper {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .booking-progress .step-label,
+  .booking-steps .step-label,
+  .steps-nav .step-label,
+  .stepper .step-label {
+    font-size: 0.68rem;
+    margin-top: 0.3rem;
+  }
+
+  .booking-progress .step-number,
+  .booking-steps .step-number,
+  .steps-nav .step-number,
+  .stepper .step-number {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.85rem;
+  }
+}
