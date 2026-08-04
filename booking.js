@@ -298,6 +298,32 @@ async function initialiseBookingPage() {
     return Number.isFinite(hours) && Number.isFinite(minutes) ? (hours * 60) + minutes : NaN;
   }
 
+  function normaliseExactTimeSlots(input) {
+    if (!Array.isArray(input)) return [];
+
+    const unique = new Map();
+
+    input.forEach((slot) => {
+      const start = String(slot?.start || slot?.label || '').trim();
+
+      // Ignore legacy broad periods such as morning/afternoon/evening.
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(start)) return;
+
+      const startMinutes = timeToMinutes(start);
+      const endMinutes = startMinutes + 30;
+      const end = `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
+
+      unique.set(start, {
+        id: start.replace(':', '-'),
+        label: start,
+        start,
+        end
+      });
+    });
+
+    return [...unique.values()].sort((a, b) => a.start.localeCompare(b.start));
+  }
+
   function requiredSlotsForStart(startSlot, hours) {
     const requiredMinutes = Math.max(30, Math.ceil(Number(hours || 0) * 60 / 30) * 30);
     const startMinutes = timeToMinutes(startSlot.start);
@@ -1448,13 +1474,15 @@ async function initialiseBookingPage() {
           );
       }
 
-      if (
-        Array.isArray(
-          settings.slots
-        ) &&
-        settings.slots.length
-      ) {
-        slots = settings.slots;
+      if (Array.isArray(settings.slots) && settings.slots.length) {
+        const savedExactSlots = normaliseExactTimeSlots(settings.slots);
+
+        // Only use saved settings when they contain valid exact times.
+        // Legacy Morning/Afternoon/Evening settings must not override
+        // the new exact 30-minute slot configuration.
+        slots = savedExactSlots.length
+          ? savedExactSlots
+          : normaliseExactTimeSlots(config.timeSlots);
       }
 
       openingStart =
