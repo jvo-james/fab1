@@ -364,7 +364,7 @@ function renderOverview() {
   const upcoming = state.bookings.filter(row => row.date >= todayKey() && !['cancelled', 'declined'].includes(row.status)).sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 7);
   $('[data-upcoming-list]').innerHTML = upcoming.length ? upcoming.map(row => {
     const date = parseDate(row.date);
-    return `<button class="admin-upcoming-item" data-open-booking="${esc(row.id)}"><span class="admin-date-chip"><strong>${date?.getDate() || ''}</strong><span>${date?.toLocaleDateString('en-GB', { month: 'short' }) || ''}</span></span><span class="admin-list-main"><strong>${esc(getBookingName(row))}</strong><span>${esc(getServiceName(row.service))} · ${esc(row.time_slot || row.start || '')}</span></span>${statusBadge(row.status)}</button>`;
+    return `<button class="admin-upcoming-item" data-open-booking="${esc(row.id)}"><span class="admin-date-chip"><strong>${date?.getDate() || ''}</strong><span>${date?.toLocaleDateString('en-GB', { month: 'short' }) || ''}</span></span><span class="admin-list-main"><strong>${esc(getBookingName(row))}</strong><span>${esc(getServiceName(row.service))} · ${esc(row.start || String(row.time_slot || '').replace('-', ':'))}</span></span>${statusBadge(row.status)}</button>`;
   }).join('') : '<div class="admin-empty-state"><i class="fa-regular fa-calendar-check"></i><h3>No upcoming bookings</h3><p>Confirmed and requested bookings will appear here.</p></div>';
   $$('[data-open-booking]', $('[data-upcoming-list]')).forEach(button => button.addEventListener('click', () => openBooking(state.bookings.find(row => row.id === button.dataset.openBooking))));
 
@@ -412,7 +412,7 @@ function renderBookings() {
   const body = $('[data-bookings-table]');
   body.innerHTML = rows.length ? rows.map(row => {
     const member = state.team.find(item => item.id === row.assignedCleanerId);
-    return `<tr><td><input type="checkbox" data-booking-check="${esc(row.id)}" ${state.selectedBookings.has(row.id) ? 'checked' : ''}></td><td><strong>${esc(humanDate(row.date))}</strong><br><small>${esc(row.time_slot || row.start || '')}</small></td><td><strong>${esc(getBookingName(row))}</strong><br><small>${esc(row.reference || row.email || '')}</small></td><td>${esc(getServiceName(row.service))}</td><td>${esc(member?.name || row.assignedCleaner || 'Unassigned')}</td><td><strong>${esc(row.finalPrice != null ? money(row.finalPrice) : 'Price pending')}</strong><br><small>${esc(row.depositStatus === 'paid' || row.paymentStatus === 'deposit_paid' ? '£25 deposit paid' : 'Deposit pending')}</small></td><td>${statusBadge(row.status)}</td><td><button class="admin-row-action" data-open-booking="${esc(row.id)}">Manage</button></td></tr>`;
+    return `<tr><td><input type="checkbox" data-booking-check="${esc(row.id)}" ${state.selectedBookings.has(row.id) ? 'checked' : ''}></td><td><strong>${esc(humanDate(row.date))}</strong><br><small>${esc(row.start || String(row.time_slot || '').replace('-', ':'))}</small></td><td><strong>${esc(getBookingName(row))}</strong><br><small>${esc(row.reference || row.email || '')}</small></td><td>${esc(getServiceName(row.service))}</td><td>${esc(member?.name || row.assignedCleaner || 'Unassigned')}</td><td><strong>${esc(row.finalPrice != null ? money(row.finalPrice) : 'Price pending')}</strong><br><small>${esc(row.depositStatus === 'paid' || row.paymentStatus === 'deposit_paid' ? '£25 deposit paid' : 'Deposit pending')}</small></td><td>${statusBadge(row.status)}</td><td><button class="admin-row-action" data-open-booking="${esc(row.id)}">Manage</button></td></tr>`;
   }).join('') : '<tr><td colspan="8"><div class="admin-empty-state"><h3>No matching bookings</h3><p>Try changing the filters.</p></div></td></tr>';
   $$('[data-open-booking]', body).forEach(button => button.addEventListener('click', () => openBooking(state.bookings.find(row => row.id === button.dataset.openBooking))));
   $$('[data-booking-check]', body).forEach(input => input.addEventListener('change', () => {
@@ -431,7 +431,7 @@ function renderBookingBulkBar() {
 function bookingForm(row = {}) {
   const cleanerOptions = ['<option value="">Unassigned</option>', ...state.team.filter(item => item.status !== 'inactive').map(item => `<option value="${esc(item.id)}" ${row.assignedCleanerId === item.id ? 'selected' : ''}>${esc(item.name)}</option>`)].join('');
   const statuses = ['awaiting_deposit', 'deposit_paid', 'awaiting_confirmation', 'confirmed', 'in_progress', 'completed', 'deposit_not_paid', 'cancelled', 'declined'];
-  return `<form data-booking-form class="admin-form-stack"><span class="admin-kicker">${row.id ? 'Booking management' : 'Manual booking'}</span><h2 id="admin-modal-title">${row.id ? esc(row.reference || getBookingName(row)) : 'Add a booking'}</h2><div class="admin-modal-grid"><label>First name<input name="first_name" value="${esc(row.first_name || '')}" required></label><label>Last name<input name="last_name" value="${esc(row.last_name || '')}"></label><label>Email<input name="email" type="email" value="${esc(row.email || '')}" required></label><label>Phone<input name="phone" value="${esc(row.phone || '')}"></label><label class="full">Address<input name="address" value="${esc(row.address || '')}"></label><label>Postcode<input name="postcode" value="${esc(row.postcode || '')}"></label><label>Region<select name="region"><option value="greater-manchester" ${row.region === 'greater-manchester' ? 'selected' : ''}>Greater Manchester</option><option value="london-luton" ${row.region === 'london-luton' ? 'selected' : ''}>London & Luton</option></select></label><label>Service<select name="service">${serviceOptions(row.service)}</select></label><label>Date<input name="date" type="date" value="${esc(row.date || todayKey())}" required></label><label>Time / window<input name="time_slot" value="${esc(row.time_slot || '')}" required></label><label>Status<select name="status">${statuses.map(value => `<option value="${value}" ${row.status === value ? 'selected' : ''}>${value.replaceAll('_', ' ')}</option>`).join('')}</select></label><label>Assigned cleaner<select name="assignedCleanerId">${cleanerOptions}</select></label><label>Indicative estimate<input name="estimate" type="number" min="0" step="0.01" value="${esc(row.estimate ?? row.total ?? '')}"></label><label>Deposit paid<input value="${esc(row.depositStatus === 'paid' || row.paymentStatus === 'deposit_paid' ? '£25 paid' : 'Not paid')}" readonly></label><label>Actual price communicated<input name="finalPrice" type="number" min="0" step="0.01" value="${esc(row.finalPrice ?? '')}" placeholder="Enter after review"></label><label>Balance status<select name="balanceStatus"><option value="price_to_be_communicated" ${row.balanceStatus === 'price_to_be_communicated' ? 'selected' : ''}>Price to be communicated</option><option value="communicated" ${row.balanceStatus === 'communicated' ? 'selected' : ''}>Price communicated</option><option value="paid" ${row.balanceStatus === 'paid' ? 'selected' : ''}>Balance paid</option></select></label><label class="full">Customer notes<textarea name="notes" rows="3">${esc(row.notes || '')}</textarea></label><label class="full">Internal notes<textarea name="adminNotes" rows="4">${esc(row.adminNotes || '')}</textarea></label></div><div class="admin-form-actions"><button class="btn" type="submit">${row.id ? 'Save booking' : 'Create booking'}</button>${row.id ? '<button class="btn btn-ghost" data-email-booking type="button"><i class="fa-regular fa-envelope"></i> Email customer</button><button class="btn btn-ghost" data-print-booking type="button"><i class="fa-solid fa-print"></i> Print</button><button class="btn btn-danger" data-archive-booking type="button">Archive</button>' : ''}</div><p class="form-status" data-booking-form-status></p></form>`;
+  return `<form data-booking-form class="admin-form-stack"><span class="admin-kicker">${row.id ? 'Booking management' : 'Manual booking'}</span><h2 id="admin-modal-title">${row.id ? esc(row.reference || getBookingName(row)) : 'Add a booking'}</h2><div class="admin-modal-grid"><label>First name<input name="first_name" value="${esc(row.first_name || '')}" required></label><label>Last name<input name="last_name" value="${esc(row.last_name || '')}"></label><label>Email<input name="email" type="email" value="${esc(row.email || '')}" required></label><label>Phone<input name="phone" value="${esc(row.phone || '')}"></label><label class="full">Address<input name="address" value="${esc(row.address || '')}"></label><label>Postcode<input name="postcode" value="${esc(row.postcode || '')}"></label><label>Region<select name="region"><option value="greater-manchester" ${row.region === 'greater-manchester' ? 'selected' : ''}>Greater Manchester</option><option value="london-luton" ${row.region === 'london-luton' ? 'selected' : ''}>London & Luton</option></select></label><label>Service<select name="service">${serviceOptions(row.service)}</select></label><label>Date<input name="date" type="date" value="${esc(row.date || todayKey())}" required></label><label>Start time<input name="time_slot" value="${esc(row.time_slot || '')}" required></label><label>Status<select name="status">${statuses.map(value => `<option value="${value}" ${row.status === value ? 'selected' : ''}>${value.replaceAll('_', ' ')}</option>`).join('')}</select></label><label>Assigned cleaner<select name="assignedCleanerId">${cleanerOptions}</select></label><label>Indicative estimate<input name="estimate" type="number" min="0" step="0.01" value="${esc(row.estimate ?? row.total ?? '')}"></label><label>Deposit paid<input value="${esc(row.depositStatus === 'paid' || row.paymentStatus === 'deposit_paid' ? '£25 paid' : 'Not paid')}" readonly></label><label>Actual price communicated<input name="finalPrice" type="number" min="0" step="0.01" value="${esc(row.finalPrice ?? '')}" placeholder="Enter after review"></label><label>Balance status<select name="balanceStatus"><option value="price_to_be_communicated" ${row.balanceStatus === 'price_to_be_communicated' ? 'selected' : ''}>Price to be communicated</option><option value="communicated" ${row.balanceStatus === 'communicated' ? 'selected' : ''}>Price communicated</option><option value="paid" ${row.balanceStatus === 'paid' ? 'selected' : ''}>Balance paid</option></select></label><label class="full">Customer notes<textarea name="notes" rows="3">${esc(row.notes || '')}</textarea></label><label class="full">Internal notes<textarea name="adminNotes" rows="4">${esc(row.adminNotes || '')}</textarea></label></div><div class="admin-form-actions"><button class="btn" type="submit">${row.id ? 'Save booking' : 'Create booking'}</button>${row.id ? '<button class="btn btn-ghost" data-email-booking type="button"><i class="fa-regular fa-envelope"></i> Email customer</button><button class="btn btn-ghost" data-print-booking type="button"><i class="fa-solid fa-print"></i> Print</button><button class="btn btn-danger" data-archive-booking type="button">Archive</button>' : ''}</div><p class="form-status" data-booking-form-status></p></form>`;
 }
 
 function serviceOptions(selected = '') {
@@ -548,14 +548,31 @@ async function loadAvailabilityLocks() {
   state.availabilityUnsubscribe = await subscribeSlotLocks(start, end, locks => { state.locks = locks; renderAvailabilityCalendar(); renderAvailabilityEditor(); });
 }
 
+function addMinutesToTime(value, minutesToAdd = 30) {
+  const [hours, minutes] = String(value || '00:00').split(':').map(Number);
+  const total = (hours * 60) + minutes + minutesToAdd;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+function slotIdForTime(value) { return String(value || '').replace(':', '-'); }
+function normaliseExactSlots() {
+  const unique = new Map();
+  state.slots.forEach(slot => {
+    if (!slot.start) return;
+    unique.set(slot.start, { id: slotIdForTime(slot.start), label: slot.start, start: slot.start, end: addMinutesToTime(slot.start) });
+  });
+  state.slots = [...unique.values()].sort((a, b) => a.start.localeCompare(b.start));
+}
 function renderDefaultSlots() {
+  normaliseExactSlots();
   const node = $('[data-default-slots]');
-  node.innerHTML = state.slots.map((slot, index) => `<div class="admin-slot-default" data-default-slot="${index}"><input data-slot-label value="${esc(slot.label)}" aria-label="Label"><input data-slot-start type="time" value="${esc(slot.start)}"><input data-slot-end type="time" value="${esc(slot.end)}"><button class="admin-icon-button" data-remove-slot title="Remove"><i class="fa-solid fa-trash"></i></button></div>`).join('');
+  node.innerHTML = state.slots.map((slot, index) => `<div class="admin-slot-default" data-default-slot="${index}"><input data-slot-start type="time" step="1800" value="${esc(slot.start)}" aria-label="Start time"><span>30-minute start interval</span><button class="admin-icon-button" data-remove-slot title="Remove"><i class="fa-solid fa-trash"></i></button></div>`).join('');
   $$('[data-default-slot]', node).forEach(row => {
     const index = Number(row.dataset.defaultSlot);
-    $('[data-slot-label]', row).addEventListener('input', event => state.slots[index].label = event.target.value);
-    $('[data-slot-start]', row).addEventListener('input', event => state.slots[index].start = event.target.value);
-    $('[data-slot-end]', row).addEventListener('input', event => state.slots[index].end = event.target.value);
+    $('[data-slot-start]', row).addEventListener('change', event => {
+      const start = event.target.value;
+      state.slots[index] = { id: slotIdForTime(start), label: start, start, end: addMinutesToTime(start) };
+      renderDefaultSlots();
+    });
     $('[data-remove-slot]', row).addEventListener('click', () => { state.slots.splice(index, 1); renderDefaultSlots(); });
   });
 }
@@ -588,12 +605,12 @@ function renderAvailabilityEditor() {
   node.innerHTML = state.slots.map(slot => {
     const lock = state.locks.get(`${state.adminRegion}_${selected}_${slot.id}`);
     const protectedStatus = lock && !['available', 'blocked'].includes(lock.status);
-    return `<div class="admin-slot-editor"><label class="admin-check-row"><input type="checkbox" value="${esc(slot.id)}" ${lock?.status === 'available' ? 'checked' : ''} ${protectedStatus ? 'disabled' : ''}><span><strong>${esc(slot.label)}</strong>${protectedStatus ? ` · ${esc(lock.status)}` : ''}</span></label><input data-editor-start type="time" value="${esc(lock?.start || slot.start)}" ${protectedStatus ? 'disabled' : ''}><input data-editor-end type="time" value="${esc(lock?.end || slot.end)}" ${protectedStatus ? 'disabled' : ''}></div>`;
+    return `<div class="admin-slot-editor"><label class="admin-check-row"><input type="checkbox" value="${esc(slot.id)}" ${lock?.status === 'available' ? 'checked' : ''} ${protectedStatus ? 'disabled' : ''}><span><strong>${esc(slot.start)}</strong>${protectedStatus ? ` · ${esc(lock.status)}` : ''}</span></label></div>`;
   }).join('');
   $('[data-block-day]').checked = state.slots.length > 0 && state.slots.every(slot => state.locks.get(`${state.adminRegion}_${selected}_${slot.id}`)?.status === 'available');
 }
 
-$('[data-add-slot]')?.addEventListener('click', () => { const id = `slot-${uid()}`; state.slots.push({ id, label: 'New window', start: '09:00', end: '12:00' }); renderDefaultSlots(); });
+$('[data-add-slot]')?.addEventListener('click', () => { const start = '09:00'; state.slots.push({ id: slotIdForTime(start), label: start, start, end: addMinutesToTime(start) }); renderDefaultSlots(); });
 $('[data-admin-prev]')?.addEventListener('click', () => { state.availabilityMonth = new Date(state.availabilityMonth.getFullYear(), state.availabilityMonth.getMonth() - 1, 1); state.selectedAvailabilityDate = ''; loadAvailabilityLocks(); });
 $('[data-admin-next]')?.addEventListener('click', () => { state.availabilityMonth = new Date(state.availabilityMonth.getFullYear(), state.availabilityMonth.getMonth() + 1, 1); state.selectedAvailabilityDate = ''; loadAvailabilityLocks(); });
 $('[data-block-day]')?.addEventListener('change', event => $$('.admin-slot-editor input[type="checkbox"]:not(:disabled)').forEach(input => input.checked = event.target.checked));
@@ -601,16 +618,15 @@ $('[data-save-hours]')?.addEventListener('click', async () => {
   const data = { start: $('#admin-start').value, end: $('#admin-end').value, workingDays: $$('.admin-day-toggles input:checked').map(input => Number(input.value)), slots: state.slots };
   await saveAvailabilitySettings(data);
   state.availability = data;
-  await logAdminActivity('availability_defaults_updated', { type: 'website', description: 'Updated default working hours and time windows' });
+  await logAdminActivity('availability_defaults_updated', { type: 'website', description: 'Updated default working hours and exact start times' });
   toast('Default availability saved.');
 });
 $('[data-save-blocks]')?.addEventListener('click', async () => {
   const rows = $$('.admin-slot-editor');
-  const selected = rows.filter(row => $('input[type="checkbox"]', row).checked).map(row => ({ id: $('input[type="checkbox"]', row).value, start: $('[data-editor-start]', row).value, end: $('[data-editor-end]', row).value }));
-  if (selected.some(item => !item.start || !item.end || item.start >= item.end)) { $('[data-availability-status]').textContent = 'Every selected window needs a valid start and end time.'; $('[data-availability-status]').className = 'form-status error'; return; }
+  const selected = rows.filter(row => $('input[type="checkbox"]', row).checked).map(row => { const id = $('input[type="checkbox"]', row).value; return state.slots.find(slot => slot.id === id); }).filter(Boolean);
   await saveDateBlocks(state.selectedAvailabilityDate, selected, $('[data-block-day]').checked, state.slots, state.adminRegion);
   await logAdminActivity('availability_date_updated', { type: 'website', description: `Updated availability for ${state.selectedAvailabilityDate}` });
-  $('[data-availability-status]').textContent = 'Available times saved.';
+  $('[data-availability-status]').textContent = 'Available start times saved.';
 });
 
 function updateMonthBulkButton() {
@@ -637,7 +653,7 @@ $('[data-apply-month-availability]')?.addEventListener('click', async () => {
   try {
     const count = await saveMonthAvailability(dates, state.slots.map(slot=>slot.id), state.slots, state.adminRegion);
     await logAdminActivity('availability_month_opened', { type:'website', description:`Opened ${count} availability windows for ${month.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}` });
-    status.textContent = `${count} available time windows saved. Existing bookings and paid deposits were not changed.`;
+    status.textContent = `${count} available start times saved. Existing bookings and paid deposits were not changed.`;
     await loadAvailabilityLocks();
   } catch (error) {
     console.error(error);
