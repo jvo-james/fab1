@@ -292,6 +292,28 @@ async function initialiseBookingPage() {
     );
   }
 
+
+  function timeToMinutes(value) {
+    const [hours, minutes] = String(value || '').split(':').map(Number);
+    return Number.isFinite(hours) && Number.isFinite(minutes) ? (hours * 60) + minutes : NaN;
+  }
+
+  function requiredSlotsForStart(startSlot, hours) {
+    const requiredMinutes = Math.max(30, Math.ceil(Number(hours || 0) * 60 / 30) * 30);
+    const startMinutes = timeToMinutes(startSlot.start);
+    const endMinutes = startMinutes + requiredMinutes;
+    return activeSlots().filter(slot => {
+      const slotStart = timeToMinutes(slot.start);
+      return slotStart >= startMinutes && slotStart < endMinutes;
+    });
+  }
+
+  function startTimeIsAvailable(day, startSlot, hours) {
+    const required = requiredSlotsForStart(startSlot, hours);
+    const requiredMinutes = Math.max(30, Math.ceil(Number(hours || 0) * 60 / 30) * 30);
+    return required.length === requiredMinutes / 30 && required.every(slot => slotIsAvailable(day, slot));
+  }
+
   function lockIsActive(lock) {
     if (!lock) {
       return false;
@@ -368,9 +390,8 @@ async function initialiseBookingPage() {
   }
 
   function availableSlotsForDate(day) {
-    return activeSlots().filter((slot) => {
-      return slotIsAvailable(day, slot);
-    });
+    const hours = Number(form.dataset.hours || estimateBooking().hours || 0);
+    return activeSlots().filter((slot) => startTimeIsAvailable(day, slot, hours));
   }
 
   function displaySlot(day, slot) {
@@ -535,11 +556,7 @@ async function initialiseBookingPage() {
 
     if (summary.time) {
       summary.time.textContent =
-        shownSlot
-          ? `${shownSlot.label} · ` +
-            `${shownSlot.start}–` +
-            `${shownSlot.end}`
-          : 'Choose time';
+        shownSlot ? `${shownSlot.start} start` : 'Choose time';
     }
 
     if (summary.total) {
@@ -1224,7 +1241,7 @@ async function initialiseBookingPage() {
         'time-slot-empty';
 
       message.textContent =
-        'No time windows have been configured.';
+        'No start times have been configured.';
 
       timeSlotList.append(message);
 
@@ -1233,12 +1250,10 @@ async function initialiseBookingPage() {
 
     let availableCount = 0;
 
+    const estimatedHours = Number(form.dataset.hours || estimateBooking().hours || 0);
+
     visibleSlots.forEach((slot) => {
-      const available =
-        slotIsAvailable(
-          key,
-          slot
-        );
+      const available = startTimeIsAvailable(key, slot, estimatedHours);
 
       if (available) {
         availableCount += 1;
@@ -1284,20 +1299,16 @@ async function initialiseBookingPage() {
       const title =
         document.createElement('b');
 
-      title.textContent =
-        slot.label;
+      title.textContent = shown.start;
 
       const details =
         document.createElement(
           'small'
         );
 
-      details.textContent =
-        `${shown.start} – ` +
-        `${shown.end}` +
-        `${available
-          ? ''
-          : ' · Unavailable'}`;
+      details.textContent = available
+        ? `Estimated ${estimatedHours || 0.5} hour${estimatedHours === 1 ? '' : 's'}`
+        : 'Unavailable or overlaps another booking';
 
       visual.append(
         title,
@@ -1353,7 +1364,7 @@ async function initialiseBookingPage() {
         'time-slot-empty';
 
       message.textContent =
-        'No time windows are available on this date. Please choose another date.';
+        'No start times can fit the estimated cleaning duration on this date. Please choose another date.';
 
       timeSlotList.prepend(message);
     }
@@ -1406,14 +1417,13 @@ async function initialiseBookingPage() {
       slot
     ) {
       node.textContent =
-        `This ${slot.label.toLowerCase()} ` +
-        `window will be requested as ` +
+        `The ${slot.start} start time will be requested as ` +
         `your regular ` +
         `${words[frequency] ||
           frequency} time.`;
     } else {
       node.textContent =
-        'Choose a time window for ' +
+        'Choose a start time for ' +
         `your regular ` +
         `${words[frequency] ||
           frequency} booking.`;
@@ -1580,13 +1590,7 @@ async function initialiseBookingPage() {
 
       `Date: ${data.date}`,
 
-      `Time: ${
-        slot
-          ? `${slot.label} ` +
-            `(${slot.start}-` +
-            `${slot.end})`
-          : data.time_slot
-      }`,
+      `Start time: ${slot ? slot.start : data.time_slot}`,
 
       `Property: ${
         data.property_type || ''
@@ -1848,8 +1852,9 @@ async function initialiseBookingPage() {
       data.reference = createReference();
       data.depositAmount = Number(config.depositAmount || 25);
 
-      const chosenLock = locks.get(lockId(data.date, data.time_slot));
-      if (chosenLock?.status !== 'available') {
+      const chosenSlot = slots.find(slot => slot.id === data.time_slot);
+      const chosenIsAvailable = chosenSlot && startTimeIsAvailable(data.date, chosenSlot, estimate.hours);
+      if (!chosenIsAvailable) {
         if (statusNode) {
           statusNode.textContent = 'That slot was just taken. Please return to the calendar and choose another time.';
           statusNode.className = 'form-status error';
