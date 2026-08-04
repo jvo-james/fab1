@@ -46,11 +46,12 @@ export async function subscribeSlotLocks(
   const { db, firestoreModule: f } =
     services;
 
+  // Ordering is unnecessary because consumers index records by document
+  // ID. Omitting orderBy also avoids an avoidable Firestore index failure.
   const query = f.query(
     f.collection(db, 'slotLocks'),
     f.where('date', '>=', startDate),
-    f.where('date', '<=', endDate),
-    f.orderBy('date', 'asc')
+    f.where('date', '<=', endDate)
   );
 
   return f.onSnapshot(
