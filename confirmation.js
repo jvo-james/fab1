@@ -16,7 +16,7 @@ function apply(settings=currentSettings){
  document.querySelector('[data-confirm-next]').textContent=copy.next;
  const grid=document.querySelector('[data-confirm-details]');
  const rows=type==='booking'?
- [['Reference',detail.reference],['Name',detail.name],['Service',detail.service],['Date',detail.date],['Preferred time',detail.time],['Deposit paid',detail.depositPaid?'£25':detail.deposit],['Payment status',detail.paymentStatus],['Confirmation email',detail.email]]:
+ [['Reference',detail.reference],['Name',detail.name],['Service',detail.service],['Date',detail.date],['Start time',detail.time],['Deposit paid',detail.depositPaid?'£25':detail.deposit],['Payment status',detail.paymentStatus],['Confirmation email',detail.email]]:
  [['Applicant',detail.name],['Role',detail.role],['Email',detail.email]];
  grid.innerHTML=rows.filter(([,v])=>v).map(([k,v])=>`<div><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('');
  if(!grid.innerHTML)grid.innerHTML='<p>Your submission was received successfully.</p>';
