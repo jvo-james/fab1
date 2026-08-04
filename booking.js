@@ -1285,6 +1285,10 @@ async function initialiseBookingPage() {
         availableCount += 1;
       }
 
+      if (!available) {
+        return;
+      }
+
       const shown = displaySlot(
         key,
         slot
@@ -1298,11 +1302,6 @@ async function initialiseBookingPage() {
       label.className =
         'time-slot';
 
-      label.classList.toggle(
-        'is-unavailable',
-        !available
-      );
-
       const input =
         document.createElement(
           'input'
@@ -1311,10 +1310,7 @@ async function initialiseBookingPage() {
       input.type = 'radio';
       input.name = 'calendar_slot';
       input.value = slot.id;
-      input.disabled = !available;
-
       input.checked =
-        available &&
         selectedSlot === slot.id;
 
       const visual =
@@ -1332,9 +1328,7 @@ async function initialiseBookingPage() {
           'small'
         );
 
-      details.textContent = available
-        ? `Estimated ${estimatedHours || 0.5} hour${estimatedHours === 1 ? '' : 's'}`
-        : 'Unavailable or overlaps another booking';
+      details.textContent = `Estimated ${estimatedHours || 0.5} hour${estimatedHours === 1 ? '' : 's'}`;
 
       visual.append(
         title,
