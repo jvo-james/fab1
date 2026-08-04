@@ -15,7 +15,6 @@ exports.handler = async (event) => {
     if (!snap.exists) return json(404, { error: 'BOOKING_NOT_FOUND' });
     const b = snap.data();
     const serviceNames = { regular:'Regular clean', kitchen:'Kitchen & bathroom clean', deep:'Deep clean', holiday:'Holiday rental', oneoff:'One-off clean', tenancy:'End of tenancy', oven:'Oven & hob clean', carpet:'Carpet & upholstery' };
-    const slotNames = { morning:'Morning', afternoon:'Afternoon', evening:'Evening' };
-    return json(200, { paid: session.payment_status === 'paid', booking: { reference: b.reference, name: `${b.first_name || ''} ${b.last_name || ''}`.trim(), date: b.date, time: slotNames[b.time_slot] || b.time_slot, service: serviceNames[b.service] || b.service, email: b.email, depositPaid: session.payment_status === 'paid', deposit: '£25', paymentStatus: session.payment_status === 'paid' ? 'Deposit paid' : 'Payment processing' } });
+    return json(200, { paid: session.payment_status === 'paid', booking: { reference: b.reference, name: `${b.first_name || ''} ${b.last_name || ''}`.trim(), date: b.date, time: b.start || String(b.time_slot || '').replace('-', ':'), service: serviceNames[b.service] || b.service, email: b.email, depositPaid: session.payment_status === 'paid', deposit: '£25', paymentStatus: session.payment_status === 'paid' ? 'Deposit paid' : 'Payment processing' } });
   } catch (error) { console.error('get-checkout-status', error); return json(500, { error: 'STATUS_LOOKUP_FAILED' }); }
 };
