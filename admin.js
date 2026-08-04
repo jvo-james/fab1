@@ -566,20 +566,50 @@ function normaliseExactSlotList(input) {
 function normaliseExactSlots() {
   state.slots = normaliseExactSlotList(state.slots);
 }
+function canonicalTimeSlots() {
+  return normaliseExactSlotList(config.timeSlots || []);
+}
+
+function selectedDefaultSlotIds() {
+  return new Set(state.slots.map(slot => slot.id));
+}
+
 function renderDefaultSlots() {
   normaliseExactSlots();
   const node = $('[data-default-slots]');
-  node.innerHTML = state.slots.map((slot, index) => `<div class="admin-slot-default" data-default-slot="${index}"><input data-slot-start type="time" step="1800" value="${esc(slot.start)}" aria-label="Start time"><span>30-minute start interval</span><button class="admin-icon-button" data-remove-slot title="Remove"><i class="fa-solid fa-trash"></i></button></div>`).join('');
-  $$('[data-default-slot]', node).forEach(row => {
-    const index = Number(row.dataset.defaultSlot);
-    $('[data-slot-start]', row).addEventListener('change', event => {
-      const start = event.target.value;
-      state.slots[index] = { id: slotIdForTime(start), label: start, start, end: addMinutesToTime(start) };
-      renderDefaultSlots();
+  if (!node) return;
+
+  const selected = selectedDefaultSlotIds();
+  node.innerHTML = canonicalTimeSlots().map(slot => `
+    <label class="admin-default-time-option">
+      <input type="checkbox" value="${esc(slot.id)}" ${selected.has(slot.id) ? 'checked' : ''}>
+      <span>${esc(slot.start)}</span>
+    </label>
+  `).join('');
+
+  $$('input[type="checkbox"]', node).forEach(input => {
+    input.addEventListener('change', () => {
+      const chosen = new Set($$('input[type="checkbox"]:checked', node).map(item => item.value));
+      state.slots = canonicalTimeSlots().filter(slot => chosen.has(slot.id));
+      renderAvailabilityCalendar();
+      renderAvailabilityEditor();
     });
-    $('[data-remove-slot]', row).addEventListener('click', () => { state.slots.splice(index, 1); renderDefaultSlots(); });
   });
 }
+
+$('[data-select-all-default-slots]')?.addEventListener('click', () => {
+  state.slots = canonicalTimeSlots();
+  renderDefaultSlots();
+  renderAvailabilityCalendar();
+  renderAvailabilityEditor();
+});
+
+$('[data-clear-default-slots]')?.addEventListener('click', () => {
+  state.slots = [];
+  renderDefaultSlots();
+  renderAvailabilityCalendar();
+  renderAvailabilityEditor();
+});
 
 function renderAvailabilityCalendar() {
   const node = $('[data-admin-calendar]');
@@ -614,7 +644,6 @@ function renderAvailabilityEditor() {
   $('[data-block-day]').checked = state.slots.length > 0 && state.slots.every(slot => state.locks.get(`${state.adminRegion}_${selected}_${slot.id}`)?.status === 'available');
 }
 
-$('[data-add-slot]')?.addEventListener('click', () => { const start = '09:00'; state.slots.push({ id: slotIdForTime(start), label: start, start, end: addMinutesToTime(start) }); renderDefaultSlots(); });
 $('[data-admin-prev]')?.addEventListener('click', () => { state.availabilityMonth = new Date(state.availabilityMonth.getFullYear(), state.availabilityMonth.getMonth() - 1, 1); state.selectedAvailabilityDate = ''; loadAvailabilityLocks(); });
 $('[data-admin-next]')?.addEventListener('click', () => { state.availabilityMonth = new Date(state.availabilityMonth.getFullYear(), state.availabilityMonth.getMonth() + 1, 1); state.selectedAvailabilityDate = ''; loadAvailabilityLocks(); });
 $('[data-block-day]')?.addEventListener('change', event => $$('.admin-slot-editor input[type="checkbox"]:not(:disabled)').forEach(input => input.checked = event.target.checked));
@@ -1154,6 +1183,8 @@ async function initialiseDashboard() {
   // Ignore legacy broad-period settings and initialise the editor with
   // the exact 30-minute slots from config.js instead.
   state.slots = savedExactSlots.length ? savedExactSlots : configuredExactSlots;
+  // Never leave the admin with an empty or legacy time list.
+  if (!state.slots.length) state.slots = configuredExactSlots;
   $('#admin-start').value = state.availability?.start || '06:00';
   $('#admin-end').value = state.availability?.end || '23:00';
   $$('.admin-day-toggles input').forEach(input => input.checked = (state.availability?.workingDays || config.workingDays || []).includes(Number(input.value)));
