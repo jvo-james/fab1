@@ -1474,16 +1474,12 @@ async function initialiseBookingPage() {
           );
       }
 
-      if (Array.isArray(settings.slots) && settings.slots.length) {
-        const savedExactSlots = normaliseExactTimeSlots(settings.slots);
-
-        // Only use saved settings when they contain valid exact times.
-        // Legacy Morning/Afternoon/Evening settings must not override
-        // the new exact 30-minute slot configuration.
-        slots = savedExactSlots.length
-          ? savedExactSlots
-          : normaliseExactTimeSlots(config.timeSlots);
-      }
+      // The booking page always uses the canonical exact-time list from
+      // config.js. Firestore settings control working days/opening hours,
+      // while slotLocks control which individual dates and times are open.
+      // This prevents stale or partially saved admin settings from hiding
+      // every date on the public calendar.
+      slots = normaliseExactTimeSlots(config.timeSlots);
 
       openingStart =
         settings.start ||
