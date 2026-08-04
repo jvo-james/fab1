@@ -7,3 +7,12 @@
 
 /* Month-wide availability controls */
 .admin-month-bulk-card{margin-bottom:1rem}.admin-month-bulk-actions{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}.admin-month-bulk-actions .admin-check-row{min-width:230px}.admin-month-bulk-actions .btn{margin-left:auto}@media(max-width:760px){.admin-month-bulk-actions{align-items:stretch;flex-direction:column}.admin-month-bulk-actions .btn{margin-left:0;width:100%}}
+
+/* Exact start-time availability controls */
+.admin-slot-default{grid-template-columns:minmax(130px,180px) 1fr auto!important;align-items:center}
+.admin-slot-default>span{color:var(--admin-muted);font-size:.78rem}
+.admin-slot-editor{grid-template-columns:1fr!important}
+[data-admin-slot-toggles]{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+[data-admin-slot-toggles] .admin-slot-editor{padding:10px;border:1px solid var(--admin-line);border-radius:12px}
+@media(max-width:760px){[data-admin-slot-toggles]{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:420px){[data-admin-slot-toggles]{grid-template-columns:repeat(2,minmax(0,1fr))}}
