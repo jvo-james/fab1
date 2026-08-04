@@ -191,6 +191,7 @@ async function initialiseBookingPage() {
   let step = 0;
   let selectedDate = '';
   let selectedSlot = '';
+  const selectedSlots = new Set();
 
   let calendarMonth = new Date();
 
@@ -1184,6 +1185,7 @@ async function initialiseBookingPage() {
   function clearScheduleSelection() {
     selectedDate = '';
     selectedSlot = '';
+    selectedSlots.clear();
 
     if (form.elements.date) {
       form.elements.date.value = '';
@@ -1194,6 +1196,10 @@ async function initialiseBookingPage() {
     ) {
       form.elements.time_slot.value =
         '';
+    }
+
+    if (form.elements.preferred_time_slots) {
+      form.elements.preferred_time_slots.value = '[]';
     }
 
     if (timeEmpty) {
@@ -1211,6 +1217,7 @@ async function initialiseBookingPage() {
   function selectDate(key) {
     selectedDate = key;
     selectedSlot = '';
+    selectedSlots.clear();
 
     if (form.elements.date) {
       form.elements.date.value = key;
@@ -1221,6 +1228,10 @@ async function initialiseBookingPage() {
     ) {
       form.elements.time_slot.value =
         '';
+    }
+
+    if (form.elements.preferred_time_slots) {
+      form.elements.preferred_time_slots.value = '[]';
     }
 
     renderCalendar();
@@ -1241,18 +1252,18 @@ async function initialiseBookingPage() {
     timeEmpty.hidden = true;
     timeContent.hidden = false;
 
+    const selectedDateText = parseDateKey(key).toLocaleDateString(
+      'en-GB',
+      {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }
+    );
+
     selectedDateNode.textContent =
-      parseDateKey(
-        key
-      ).toLocaleDateString(
-        'en-GB',
-        {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        }
-      );
+      `What is your availability on ${selectedDateText}?`;
 
     timeSlotList.innerHTML = '';
 
@@ -1274,119 +1285,69 @@ async function initialiseBookingPage() {
       return;
     }
 
-    let availableCount = 0;
-
     const estimatedHours = Number(form.dataset.hours || estimateBooking().hours || 0);
+    const availableSlots = visibleSlots.filter((slot) =>
+      startTimeIsAvailable(key, slot, estimatedHours)
+    );
 
-    visibleSlots.forEach((slot) => {
-      const available = startTimeIsAvailable(key, slot, estimatedHours);
+    availableSlots.forEach((slot) => {
+      const shown = displaySlot(key, slot);
+      const label = document.createElement('label');
+      label.className = 'time-slot';
 
-      if (available) {
-        availableCount += 1;
-      }
-
-      if (!available) {
-        return;
-      }
-
-      const shown = displaySlot(
-        key,
-        slot
-      );
-
-      const label =
-        document.createElement(
-          'label'
-        );
-
-      label.className =
-        'time-slot';
-
-      const input =
-        document.createElement(
-          'input'
-        );
-
-      input.type = 'radio';
-      input.name = 'calendar_slot';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.name = 'calendar_slots';
       input.value = slot.id;
-      input.checked =
-        selectedSlot === slot.id;
+      input.checked = selectedSlots.has(slot.id);
 
-      const visual =
-        document.createElement(
-          'span'
-        );
-
-      const title =
-        document.createElement('b');
-
+      const visual = document.createElement('span');
+      const title = document.createElement('b');
       title.textContent = shown.start;
+      visual.append(title);
+      label.append(input, visual);
 
-      const details =
-        document.createElement(
-          'small'
-        );
-
-      details.textContent = `Estimated ${estimatedHours || 0.5} hour${estimatedHours === 1 ? '' : 's'}`;
-
-      visual.append(
-        title,
-        details
-      );
-
-      label.append(
-        input,
-        visual
-      );
-
-      input.addEventListener(
-        'change',
-        () => {
-          if (
-            !input.checked ||
-            input.disabled
-          ) {
-            return;
-          }
-
-          selectedSlot = slot.id;
-
-          if (
-            form.elements.time_slot
-          ) {
-            form.elements.time_slot
-              .value = slot.id;
-          }
-
-          updateRecurringMessage();
-          estimateBooking();
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          selectedSlots.add(slot.id);
+        } else {
+          selectedSlots.delete(slot.id);
         }
-      );
+
+        selectedSlot = selectedSlots.values().next().value || '';
+
+        if (form.elements.time_slot) {
+          form.elements.time_slot.value = selectedSlot;
+        }
+
+        if (form.elements.preferred_time_slots) {
+          form.elements.preferred_time_slots.value = JSON.stringify([...selectedSlots]);
+        }
+
+        updateRecurringMessage();
+        estimateBooking();
+      });
 
       timeSlotList.append(label);
     });
 
-    if (!availableCount) {
+    if (!availableSlots.length) {
       selectedSlot = '';
+      selectedSlots.clear();
 
-      if (
-        form.elements.time_slot
-      ) {
-        form.elements.time_slot.value =
-          '';
+      if (form.elements.time_slot) {
+        form.elements.time_slot.value = '';
       }
 
-      const message =
-        document.createElement('p');
+      if (form.elements.preferred_time_slots) {
+        form.elements.preferred_time_slots.value = '[]';
+      }
 
-      message.className =
-        'time-slot-empty';
-
+      const message = document.createElement('p');
+      message.className = 'time-slot-empty';
       message.textContent =
         'No start times can fit the estimated cleaning duration on this date. Please choose another date.';
-
-      timeSlotList.prepend(message);
+      timeSlotList.append(message);
     }
 
     updateRecurringMessage();
@@ -1437,13 +1398,11 @@ async function initialiseBookingPage() {
       slot
     ) {
       node.textContent =
-        `The ${slot.start} start time will be requested as ` +
-        `your regular ` +
-        `${words[frequency] ||
-          frequency} time.`;
+        `Your first selected time, ${slot.start}, will be treated as the primary preference for your ` +
+        `${words[frequency] || frequency} booking.`;
     } else {
       node.textContent =
-        'Choose a start time for ' +
+        'Choose one or more start times for ' +
         `your regular ` +
         `${words[frequency] ||
           frequency} booking.`;
@@ -1608,7 +1567,7 @@ async function initialiseBookingPage() {
 
       `Date: ${data.date}`,
 
-      `Start time: ${slot ? slot.start : data.time_slot}`,
+      `Preferred start times: ${(data.preferred_time_slots || [data.time_slot]).map((id) => slots.find((item) => item.id === id)?.start || String(id).replace('-', ':')).join(', ')}`,
 
       `Property: ${
         data.property_type || ''
@@ -1864,6 +1823,7 @@ async function initialiseBookingPage() {
       const estimate = estimateBooking();
       const data = Object.fromEntries(new FormData(form).entries());
       data.addons = [...form.querySelectorAll('[name="addons"]:checked')].map((input) => input.value);
+      data.preferred_time_slots = [...selectedSlots];
       data.estimate = estimate.total;
       data.estimatedHours = estimate.hours;
       data.region = selectedRegion();
