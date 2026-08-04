@@ -64,3 +64,112 @@
   flex-wrap: wrap;
   gap: .5rem;
 }
+
+/* Availability editor layout repair */
+@media (min-width: 901px) {
+  .admin-availability-card {
+    overflow: visible;
+  }
+
+  .admin-availability-layout {
+    grid-template-columns: minmax(520px, 1fr) minmax(420px, 520px);
+    align-items: start;
+    gap: 28px;
+  }
+
+  .admin-day-editor {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--admin-line);
+    border-radius: 20px;
+    background: #f8fbf8;
+    position: sticky;
+    top: 96px;
+  }
+
+  [data-admin-slot-toggles] {
+    grid-template-columns: repeat(4, minmax(86px, 1fr));
+    gap: 10px;
+    max-height: 520px;
+    overflow: auto;
+    padding: 4px 4px 12px;
+  }
+}
+
+[data-admin-slot-toggles] .admin-slot-editor {
+  display: block !important;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent;
+}
+
+[data-admin-slot-toggles] .admin-check-row {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px !important;
+  min-height: 58px;
+  width: 100%;
+  padding: 10px 8px;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--admin-ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+[data-admin-slot-toggles] .admin-check-row input {
+  flex: 0 0 auto;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0;
+  accent-color: var(--admin-green);
+}
+
+[data-admin-slot-toggles] .admin-check-row span {
+  min-width: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-admin-slot-toggles] .admin-check-row:has(input:checked) {
+  border-color: #9ac6a3;
+  background: #edf7ed;
+}
+
+.admin-day-editor > .admin-check-row {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.admin-day-editor [data-save-blocks] {
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .admin-day-editor {
+    padding: 18px;
+    border: 1px solid var(--admin-line);
+    border-radius: 18px;
+    background: #f8fbf8;
+  }
+
+  [data-admin-slot-toggles] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-height: 430px;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  [data-admin-slot-toggles] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
