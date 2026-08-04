@@ -554,13 +554,17 @@ function addMinutesToTime(value, minutesToAdd = 30) {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 function slotIdForTime(value) { return String(value || '').replace(':', '-'); }
-function normaliseExactSlots() {
+function normaliseExactSlotList(input) {
   const unique = new Map();
-  state.slots.forEach(slot => {
-    if (!slot.start) return;
-    unique.set(slot.start, { id: slotIdForTime(slot.start), label: slot.start, start: slot.start, end: addMinutesToTime(slot.start) });
+  (Array.isArray(input) ? input : []).forEach(slot => {
+    const start = String(slot?.start || slot?.label || '').trim();
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(start)) return;
+    unique.set(start, { id: slotIdForTime(start), label: start, start, end: addMinutesToTime(start) });
   });
-  state.slots = [...unique.values()].sort((a, b) => a.start.localeCompare(b.start));
+  return [...unique.values()].sort((a, b) => a.start.localeCompare(b.start));
+}
+function normaliseExactSlots() {
+  state.slots = normaliseExactSlotList(state.slots);
 }
 function renderDefaultSlots() {
   normaliseExactSlots();
@@ -1143,7 +1147,13 @@ async function initialiseDashboard() {
   state.initialised = true;
   attachFilters();
   state.availability = await getAvailabilitySettings().catch(() => null);
-  if (state.availability?.slots?.length) state.slots = state.availability.slots;
+
+  const savedExactSlots = normaliseExactSlotList(state.availability?.slots);
+  const configuredExactSlots = normaliseExactSlotList(config.timeSlots);
+
+  // Ignore legacy broad-period settings and initialise the editor with
+  // the exact 30-minute slots from config.js instead.
+  state.slots = savedExactSlots.length ? savedExactSlots : configuredExactSlots;
   $('#admin-start').value = state.availability?.start || '06:00';
   $('#admin-end').value = state.availability?.end || '23:00';
   $$('.admin-day-toggles input').forEach(input => input.checked = (state.availability?.workingDays || config.workingDays || []).includes(Number(input.value)));
