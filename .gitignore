@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+.firebase/
+firebase-debug.log
+.env
+.env.*
+!.env.example
+service-account*.json
+firebase-admin*.json
+.netlify/

@@ -1,0 +1,10 @@
+{
+  "name": "faustinas-sparkly-services",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static booking website with Netlify Functions, Stripe Checkout and Firebase.",
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "stripe": "^17.5.0"
+  }
+}

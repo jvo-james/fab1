@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 150" preserveAspectRatio="none" aria-hidden="true">
+  <path fill="#fffefa" d="M0 83C92 49 166 54 242 86c74 31 145 27 219-10 84-42 163-39 246 7 75 42 154 42 238-1 80-40 157-38 236 3 73 38 145 39 259 0v65H0Z"/>
+  <g fill="#fffefa">
+    <circle cx="96" cy="77" r="31"/><circle cx="143" cy="87" r="21"/>
+    <circle cx="507" cy="73" r="35"/><circle cx="555" cy="84" r="23"/>
+    <circle cx="934" cy="75" r="37"/><circle cx="984" cy="85" r="22"/>
+    <circle cx="1311" cy="79" r="30"/>
+  </g>
+</svg>

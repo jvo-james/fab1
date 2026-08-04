@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#173f2a" name="theme-color"/>
+<meta content="Private operations dashboard for FAUSTINA'S SPARKLY SERVICES." name="description"/>
+<title>Operations Dashboard | FAUSTINA'S SPARKLY SERVICES</title>
+<link href="images/logo.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@1,6..72,600&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+<link href="admin.css" rel="stylesheet"/>
+<script defer="" src="config.js"></script>
+<script defer="" src="app.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="admin.js" type="module"></script>
+</head>
+<body class="admin-body">
+<main class="admin-page">
+<section class="admin-login" data-admin-login="">
+<div class="admin-login-card">
+<a class="logo" href="index.html"><img alt="FAUSTINA'S SPARKLY SERVICES" src="images/logo.png"/></a>
+<span class="admin-kicker">Secure operations centre</span>
+<h1>Welcome back</h1>
+<p>Manage customers, schedules, staff, messages, pricing, website content and reports in one place.</p>
+<form class="admin-form-stack" id="admin-login-form">
+<label>Email<input autocomplete="username" id="admin-email" required="" type="email"/></label>
+<label>Password<input autocomplete="current-password" id="admin-password" required="" type="password"/></label>
+<button class="btn btn-block" type="submit">Sign in</button>
+<p class="form-status" data-admin-login-status=""></p>
+</form>
+<a class="admin-back-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to website</a>
+</div>
+</section>
+<section class="admin-dashboard" data-admin-dashboard="" hidden="">
+<header class="admin-topbar">
+<button aria-expanded="false" aria-label="Open dashboard menu" class="admin-icon-button admin-menu-toggle" data-admin-menu="" type="button"><i class="fa-solid fa-bars"></i></button>
+<div class="admin-topbar-brand"><img alt="" src="images/logo.png"/><div><strong>FAUSTINA'S SPARKLY SERVICES</strong><span>Operations dashboard</span></div></div>
+<div class="admin-global-search"><i class="fa-solid fa-magnifying-glass"></i><input data-global-search="" placeholder="Search bookings, customers, enquiries…" type="search"/><div class="admin-search-results" data-global-search-results="" hidden=""></div></div>
+<button aria-label="Notifications" class="admin-icon-button admin-notification-button" data-notification-toggle="" type="button"><i class="fa-regular fa-bell"></i><span data-notification-count="" hidden="">0</span></button>
+<div class="admin-user-menu"><div><strong data-admin-user="">Admin</strong><span data-admin-role="">Owner</span></div><button aria-label="Sign out" class="admin-icon-button" data-admin-signout="" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i></button></div>
+</header>
+<div class="admin-notification-drawer" data-notification-drawer="" hidden="">
+<div class="admin-drawer-heading"><div><span class="admin-kicker">Attention centre</span><h2>Notifications</h2></div><button class="admin-icon-button" data-notification-close="" type="button"><i class="fa-solid fa-xmark"></i></button></div>
+<div data-notification-list=""></div>
+<button class="btn btn-ghost btn-block" data-mark-notifications="" type="button">Mark all as seen</button>
+</div>
+<div class="admin-layout">
+<aside class="admin-sidebar" data-admin-nav="">
+<nav>
+<span class="admin-nav-label">Workspace</span>
+<button class="active" data-admin-tab="overview"><i class="fa-solid fa-chart-pie"></i><span>Overview</span></button>
+<button data-admin-tab="bookings"><i class="fa-solid fa-list-check"></i><span>Bookings</span><b data-nav-count="bookings" hidden="">0</b></button>
+<button data-admin-tab="schedule"><i class="fa-regular fa-calendar-days"></i><span>Schedule</span></button>
+<button data-admin-tab="availability"><i class="fa-regular fa-clock"></i><span>Availability</span></button>
+<button data-admin-tab="customers"><i class="fa-solid fa-address-book"></i><span>Customers</span></button>
+<button data-admin-tab="team"><i class="fa-solid fa-people-group"></i><span>Team</span></button>
+<span class="admin-nav-label">Inbox</span>
+<button data-admin-tab="enquiries"><i class="fa-regular fa-comments"></i><span>Enquiries</span><b data-nav-count="enquiries" hidden="">0</b></button>
+<button data-admin-tab="applications"><i class="fa-solid fa-user-plus"></i><span>Applications</span><b data-nav-count="applications" hidden="">0</b></button>
+<button data-admin-tab="feedback"><i class="fa-regular fa-star"></i><span>Reviews</span><b data-nav-count="feedback" hidden="">0</b></button>
+<button data-admin-tab="email"><i class="fa-regular fa-envelope"></i><span>Email centre</span></button>
+<span class="admin-nav-label">Business</span>
+<button data-admin-tab="services"><i class="fa-solid fa-broom-ball"></i><span>Services &amp; pricing</span></button>
+<button data-admin-tab="website"><i class="fa-solid fa-pen-ruler"></i><span>Website content</span></button>
+<button data-admin-tab="automations"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Automations</span></button>
+<button data-admin-tab="reports"><i class="fa-solid fa-chart-line"></i><span>Reports</span></button>
+<button data-admin-tab="activity"><i class="fa-solid fa-clock-rotate-left"></i><span>Activity log</span></button>
+<button data-admin-tab="trash"><i class="fa-regular fa-trash-can"></i><span>Archive &amp; trash</span></button>
+<button data-admin-tab="settings"><i class="fa-solid fa-shield-halved"></i><span>Settings &amp; security</span></button>
+</nav>
+<a class="admin-view-site" href="index.html"><i class="fa-solid fa-arrow-up-right-from-square"></i> View website</a>
+</aside>
+<section class="admin-main">
+<div class="admin-mobile-title"><span data-current-section="">Overview</span></div>
+<section class="admin-panel active" data-admin-panel="overview">
+<div class="admin-page-heading"><div><span class="admin-kicker">Good day, Faustina</span><h1>What needs your attention?</h1><p>A live view of bookings, customers, messages and business performance.</p></div><div class="admin-heading-actions"><button class="btn btn-ghost" data-export-overview="" type="button"><i class="fa-solid fa-download"></i> Export snapshot</button><button class="btn" data-quick-booking="" type="button"><i class="fa-solid fa-plus"></i> Add booking</button></div></div>
+<div class="admin-kpi-grid" data-kpi-grid=""></div>
+<div class="admin-overview-grid">
+<article class="admin-card admin-card-wide"><div class="admin-card-heading"><div><span class="admin-kicker">Today and next seven days</span><h2>Upcoming schedule</h2></div><button class="text-button" data-go-tab="schedule">Open calendar</button></div><div data-upcoming-list=""></div></article>
+<article class="admin-card"><div class="admin-card-heading"><div><span class="admin-kicker">Live feed</span><h2>Recent activity</h2></div><button class="text-button" data-go-tab="activity">View all</button></div><div class="admin-activity-list" data-recent-activity=""></div></article>
+<article class="admin-card admin-card-wide"><div class="admin-card-heading"><div><span class="admin-kicker">Monthly pulse</span><h2>Bookings and estimated revenue</h2></div><select data-report-range=""><option value="6">6 months</option><option value="12">12 months</option></select></div><div class="admin-chart" data-overview-chart=""></div></article>
+<article class="admin-card"><div class="admin-card-heading"><div><span class="admin-kicker">Quick actions</span><h2>Common tasks</h2></div></div><div class="admin-quick-actions"><button data-go-tab="availability"><i class="fa-regular fa-calendar-plus"></i> Open dates</button><button data-go-tab="enquiries"><i class="fa-regular fa-message"></i> Reply to enquiries</button><button data-go-tab="feedback"><i class="fa-regular fa-star"></i> Moderate reviews</button><button data-go-tab="email"><i class="fa-regular fa-paper-plane"></i> Send email</button></div></article>
+</div>
+</section>
+<section class="admin-panel" data-admin-panel="bookings">
+<div class="admin-page-heading"><div><span class="admin-kicker">Operations</span><h1>Bookings</h1><p>Confirm, reschedule, assign cleaners, take notes and track payment and completion.</p></div><button class="btn" data-quick-booking="" type="button"><i class="fa-solid fa-plus"></i> Add booking</button></div>
+<div class="admin-toolbar"><input data-filter="bookings" placeholder="Search name, reference, email or postcode" type="search"/><select data-booking-status-filter=""><option value="">All statuses</option><option>awaiting_deposit</option><option>deposit_paid</option><option>awaiting_confirmation</option><option>confirmed</option><option>in_progress</option><option>completed</option><option>deposit_not_paid</option><option>cancelled</option><option>declined</option></select><select data-booking-region-filter=""><option value="">All regions</option><option value="greater-manchester">Greater Manchester</option><option value="london-luton">London &amp; Luton</option></select><button class="btn btn-ghost" data-export="bookings" type="button"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-bulk-bar" data-booking-bulk="" hidden=""><span><b data-booking-selected-count="">0</b> selected</span><select data-bulk-booking-status=""><option value="">Change status…</option><option value="confirmed">Confirmed</option><option value="paid">Paid</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><button class="btn btn-sm" data-apply-booking-bulk="">Apply</button></div>
+<div class="admin-table-card"><table class="admin-data-table"><thead><tr><th><input aria-label="Select all" data-select-all-bookings="" type="checkbox"/></th><th>Date</th><th>Customer</th><th>Service</th><th>Cleaner</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody data-bookings-table=""></tbody></table></div>
+</section>
+<section class="admin-panel" data-admin-panel="schedule">
+<div class="admin-page-heading"><div><span class="admin-kicker">Calendar</span><h1>Team schedule</h1><p>See appointments by day, week or month and open any job for full details.</p></div><div class="admin-segmented"><button class="active" data-schedule-view="month">Month</button><button data-schedule-view="week">Week</button><button data-schedule-view="day">Day</button></div></div>
+<div class="admin-calendar-toolbar"><button class="admin-icon-button" data-schedule-prev=""><i class="fa-solid fa-chevron-left"></i></button><h2 data-schedule-title=""></h2><button class="admin-icon-button" data-schedule-next=""><i class="fa-solid fa-chevron-right"></i></button><button class="btn btn-ghost" data-schedule-today="">Today</button><select data-schedule-cleaner=""><option value="">All cleaners</option></select><select data-schedule-status=""><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="paid">Paid</option><option value="completed">Completed</option></select><button class="btn btn-ghost" data-print-schedule=""><i class="fa-solid fa-print"></i> Print</button></div>
+<div class="admin-schedule" data-schedule-grid=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="availability">
+<div class="admin-page-heading"><div><span class="admin-kicker">Capacity</span><h1>Availability</h1><p>Control working days, default windows and exact bookable times for each operating region.</p></div><button class="btn" data-save-hours="" type="button">Save defaults</button></div>
+<div class="admin-two-column">
+<article class="admin-card"><h2>Baseline hours</h2><div class="admin-form-grid"><label class="full">Operating region<select id="admin-region"><option value="greater-manchester">Greater Manchester</option><option value="london-luton">London &amp; Luton</option></select></label><label>Opening time<input id="admin-start" type="time" value="06:00"/></label><label>Closing time<input id="admin-end" type="time" value="23:00"/></label><fieldset class="full"><legend>Working days</legend><div class="admin-day-toggles"><label><input checked="" type="checkbox" value="1"/><span>Mon</span></label><label><input checked="" type="checkbox" value="2"/><span>Tue</span></label><label><input checked="" type="checkbox" value="3"/><span>Wed</span></label><label><input checked="" type="checkbox" value="4"/><span>Thu</span></label><label><input checked="" type="checkbox" value="5"/><span>Fri</span></label><label><input type="checkbox" value="6"/><span>Sat</span></label><label><input type="checkbox" value="0"/><span>Sun</span></label></div></fieldset></div></article>
+<article class="admin-card"><div class="admin-card-heading"><div><h2>Default time windows</h2><p>Edit labels and times used by the booking page.</p></div><button class="btn btn-sm btn-ghost" data-add-slot="" type="button"><i class="fa-solid fa-plus"></i> Add</button></div><div data-default-slots=""></div></article>
+</div>
+<article class="admin-card admin-month-bulk-card"><div class="admin-card-heading"><div><span class="admin-kicker">Bulk availability</span><h2>Open this month at once</h2><p>Select every future day in the displayed month and make every default time window available. Existing paid, requested or booked slots are kept unchanged.</p></div></div><div class="admin-month-bulk-actions"><label class="admin-check-row"><input data-select-month-days="" type="checkbox"/><span>Select all future days this month</span></label><label class="admin-check-row"><input data-select-month-times="" type="checkbox"/><span>Select all time windows</span></label><button class="btn" data-apply-month-availability="" disabled="" type="button"><i class="fa-regular fa-calendar-check"></i> Make selected month available</button></div><p class="form-status" data-month-availability-status=""></p></article><article class="admin-card admin-availability-card"><div class="admin-calendar-heading"><button class="admin-icon-button" data-admin-prev=""><i class="fa-solid fa-chevron-left"></i></button><h2 data-admin-month=""></h2><button class="admin-icon-button" data-admin-next=""><i class="fa-solid fa-chevron-right"></i></button></div><div class="admin-availability-layout"><div><div class="admin-weekdays"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div><div class="admin-month-grid" data-admin-calendar=""></div><div class="admin-legend"><span><i class="available"></i> Available</span><span><i class="occupied"></i> Booked</span><span><i class="selected"></i> Selected</span></div></div><aside class="admin-day-editor"><span class="admin-kicker">Selected date</span><h3 data-admin-selected-date="">Choose a date</h3><label class="admin-check-row"><input data-block-day="" type="checkbox"/><span>Make every window available</span></label><div data-admin-slot-toggles=""></div><button class="btn btn-block" data-save-blocks="" disabled="">Save available times</button><p class="form-status" data-availability-status=""></p></aside></div></article>
+</section>
+<section class="admin-panel" data-admin-panel="customers">
+<div class="admin-page-heading"><div><span class="admin-kicker">Relationships</span><h1>Customers</h1><p>One profile per customer with booking history, spend, addresses, reviews and notes.</p></div><button class="btn" data-add-customer=""><i class="fa-solid fa-user-plus"></i> Add customer</button></div>
+<div class="admin-toolbar"><input data-filter="customers" placeholder="Search customer" type="search"/><select data-customer-segment=""><option value="">All customers</option><option value="returning">Returning</option><option value="new">New</option><option value="high-value">High value</option></select><button class="btn btn-ghost" data-export="customers"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-customer-grid" data-customer-grid=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="team">
+<div class="admin-page-heading"><div><span class="admin-kicker">People</span><h1>Team</h1><p>Manage cleaners, skills, locations, availability and active status.</p></div><button class="btn" data-add-team=""><i class="fa-solid fa-plus"></i> Add team member</button></div>
+<div class="admin-toolbar"><input data-filter="team" placeholder="Search team" type="search"/><select data-team-status=""><option value="">All</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+<div class="admin-customer-grid" data-team-grid=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="enquiries">
+<div class="admin-page-heading"><div><span class="admin-kicker">Contact inbox</span><h1>Enquiries</h1><p>Reply, add notes, change status or convert an enquiry into a booking.</p></div></div>
+<div class="admin-toolbar"><input data-filter="enquiries" placeholder="Search enquiries" type="search"/><select data-enquiry-status=""><option value="">All statuses</option><option value="new">New</option><option value="replied">Replied</option><option value="waiting">Waiting for customer</option><option value="resolved">Resolved</option><option value="spam">Spam</option></select><button class="btn btn-ghost" data-export="enquiries"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-inbox-layout"><div class="admin-inbox-list" data-enquiry-list=""></div><article class="admin-card admin-inbox-preview" data-enquiry-preview=""><div class="admin-empty-state"><i class="fa-regular fa-message"></i><h3>Select an enquiry</h3><p>The full message and reply actions will appear here.</p></div></article></div>
+</section>
+<section class="admin-panel" data-admin-panel="applications">
+<div class="admin-page-heading"><div><span class="admin-kicker">Recruitment</span><h1>Applications</h1><p>Move applicants through review, interview, offer and hiring stages.</p></div><button class="btn btn-ghost" data-export="applications"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-toolbar"><input data-filter="applications" placeholder="Search applicant" type="search"/><select data-application-status=""><option value="">All stages</option><option value="new">New</option><option value="reviewing">Reviewing</option><option value="shortlisted">Shortlisted</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="hired">Hired</option><option value="rejected">Rejected</option><option value="archived">Archived</option></select><select data-application-role=""><option value="">All roles</option></select></div>
+<div class="admin-kanban" data-application-board=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="feedback">
+<div class="admin-page-heading"><div><span class="admin-kicker">Reputation</span><h1>Reviews</h1><p>Moderate, feature, publish and privately respond to customer feedback.</p></div><button class="btn btn-ghost" data-export="feedback"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-toolbar"><input data-filter="feedback" placeholder="Search reviews" type="search"/><select data-feedback-status=""><option value="">All statuses</option><option value="pending">Pending</option><option value="published">Published</option></select><select data-feedback-rating=""><option value="">All ratings</option><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></div>
+<div class="admin-review-grid" data-feedback-admin=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="email">
+<div class="admin-page-heading"><div><span class="admin-kicker">Communications</span><h1>Email centre</h1><p>Write messages, use saved templates, save drafts and review sending history.</p></div></div>
+<div class="admin-email-layout">
+<form class="admin-card admin-form-stack" id="admin-email-form"><div class="admin-card-heading"><div><h2>Compose email</h2><p>Messages are sent through the configured EmailJS service.</p></div><button class="btn btn-sm btn-ghost" data-save-draft="" type="button">Save draft</button></div><label>Template<select data-email-template=""><option value="">Start from blank</option></select></label><label>Recipient<input list="admin-recipient-list" name="to" required="" type="email"/></label><datalist data-recipient-list="" id="admin-recipient-list"></datalist><label>Subject<input maxlength="160" name="subject" required=""/></label><label>Message<textarea maxlength="5000" name="body" required="" rows="12"></textarea><span class="field-counter" data-email-counter="">0 / 5000</span></label><div class="admin-form-actions"><button class="btn" type="submit"><i class="fa-regular fa-paper-plane"></i> Send email</button><button class="btn btn-ghost" data-send-test="" type="button">Send test to admin</button></div><p class="form-status" data-admin-email-status=""></p></form>
+<div><article class="admin-card"><div class="admin-card-heading"><div><h2>Saved templates</h2><p>Create reusable replies and reminders.</p></div><button class="btn btn-sm btn-ghost" data-add-email-template=""><i class="fa-solid fa-plus"></i> Add</button></div><div data-email-template-list=""></div></article><article class="admin-card"><div class="admin-card-heading"><div><h2>Recent email activity</h2></div></div><div data-email-history=""></div></article></div>
+</div>
+</section>
+<section class="admin-panel" data-admin-panel="services">
+<div class="admin-page-heading"><div><span class="admin-kicker">Catalogue</span><h1>Services &amp; pricing</h1><p>Edit services, pricing, minimum duration, quote rules and visibility without touching code.</p></div><button class="btn" data-add-service=""><i class="fa-solid fa-plus"></i> Add service</button></div>
+<div class="admin-service-grid" data-service-grid=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="website">
+<div class="admin-page-heading"><div><span class="admin-kicker">Content management</span><h1>Website content</h1><p>Update contact details, service areas, announcements, FAQs and confirmation pages.</p></div><button class="btn" data-save-site-content="">Save website content</button></div>
+<div class="admin-two-column">
+<form class="admin-card admin-form-stack" data-site-content-form=""><h2>Business information</h2><label>Business name<input name="businessName"/></label><label>Phone number<input name="phoneDisplay"/></label><label>Email address<input name="email" type="email"/></label><label>Opening hours<input name="openingHours"/></label><label>Service areas<textarea name="serviceAreas" placeholder="One area per line" rows="4"></textarea></label><p class="form-status" data-site-content-status=""></p></form>
+<form class="admin-card admin-form-stack" data-announcement-form=""><h2>Announcement banner</h2><label class="admin-check-row"><input name="enabled" type="checkbox"/><span>Show banner on the website</span></label><label>Message<textarea maxlength="300" name="message" rows="4"></textarea></label><label>Link text<input maxlength="50" name="linkText"/></label><label>Link URL<input name="linkUrl" placeholder="booking.html"/></label></form>
+<article class="admin-card"><div class="admin-card-heading"><div><h2>Frequently asked questions</h2></div><button class="btn btn-sm btn-ghost" data-add-faq=""><i class="fa-solid fa-plus"></i> Add</button></div><div data-faq-list=""></div></article>
+<article class="admin-card"><h2>Confirmation pages</h2><div data-confirmation-editors=""></div></article>
+</div>
+</section>
+<section class="admin-panel" data-admin-panel="automations">
+<div class="admin-page-heading"><div><span class="admin-kicker">Customer journey</span><h1>Automations</h1><p>Choose which lifecycle messages should be sent. Scheduled items require deployed Firebase Functions.</p></div><button class="btn" data-save-automations="">Save automation settings</button></div>
+<div class="admin-automation-grid" data-automation-grid=""></div><article class="admin-card admin-callout"><i class="fa-solid fa-circle-info"></i><div><h3>How scheduled automation works</h3><p>Immediate browser emails already work. Reminders such as “24 hours before” need a scheduled Cloud Function so they still send when nobody has the admin page open.</p></div></article>
+</section>
+<section class="admin-panel" data-admin-panel="reports">
+<div class="admin-page-heading"><div><span class="admin-kicker">Performance</span><h1>Reports</h1><p>Track bookings, revenue, service popularity, customers, cancellations, reviews and recruitment.</p></div><div class="admin-heading-actions"><select data-report-period=""><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="all">All time</option></select><button class="btn btn-ghost" data-export-report=""><i class="fa-solid fa-download"></i> Export report</button></div></div>
+<div class="admin-kpi-grid" data-report-kpis=""></div>
+<div class="admin-report-grid"><article class="admin-card admin-card-wide"><h2>Revenue and bookings</h2><div class="admin-chart" data-revenue-chart=""></div></article><article class="admin-card"><h2>Service mix</h2><div data-service-report=""></div></article><article class="admin-card"><h2>Booking status</h2><div data-status-report=""></div></article><article class="admin-card admin-card-wide"><h2>Operational insights</h2><div class="admin-insight-grid" data-insights=""></div></article></div>
+</section>
+<section class="admin-panel" data-admin-panel="activity">
+<div class="admin-page-heading"><div><span class="admin-kicker">Audit trail</span><h1>Activity log</h1><p>See important administrative actions, who performed them and when.</p></div><button class="btn btn-ghost" data-export="activity"><i class="fa-solid fa-file-csv"></i> Export</button></div>
+<div class="admin-toolbar"><input data-filter="activity" placeholder="Search activity" type="search"/><select data-activity-type=""><option value="">All actions</option><option value="booking">Booking</option><option value="customer">Customer</option><option value="email">Email</option><option value="website">Website</option><option value="review">Review</option></select></div>
+<div class="admin-timeline" data-activity-log=""></div>
+</section>
+<section class="admin-panel" data-admin-panel="trash">
+<div class="admin-page-heading"><div><span class="admin-kicker">Recovery</span><h1>Archive &amp; trash</h1><p>Restore archived records or permanently delete them after review.</p></div></div>
+<div class="admin-toolbar"><select data-trash-collection=""><option value="">All record types</option><option value="bookingRequests">Bookings</option><option value="enquiries">Enquiries</option><option value="applications">Applications</option><option value="feedbackSubmissions">Reviews</option><option value="teamMembers">Team</option></select></div>
+<div class="admin-table-card"><table class="admin-data-table"><thead><tr><th>Type</th><th>Record</th><th>Archived</th><th>Reason</th><th></th></tr></thead><tbody data-trash-table=""></tbody></table></div>
+</section>
+<section class="admin-panel" data-admin-panel="settings">
+<div class="admin-page-heading"><div><span class="admin-kicker">Control centre</span><h1>Settings &amp; security</h1><p>Manage roles, safer deletion, inactivity lock and data retention preferences.</p></div><button class="btn" data-save-security="">Save security settings</button></div>
+<div class="admin-two-column"><form class="admin-card admin-form-stack" data-security-form=""><h2>Session and deletion safety</h2><label>Auto sign-out after<select name="sessionMinutes"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option></select></label><label class="admin-check-row"><input checked="" name="confirmDelete" type="checkbox"/><span>Require confirmation before archive or delete</span></label><label class="admin-check-row"><input checked="" name="preferArchive" type="checkbox"/><span>Archive records instead of deleting immediately</span></label><label>Trash retention<select name="trashDays"><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label><p class="form-status" data-security-status=""></p></form><article class="admin-card"><h2>Admin accounts and roles</h2><p>Firestore rules support active admins. Use roles to limit what future staff accounts see in this dashboard.</p><div data-admin-users=""></div><button class="btn btn-sm btn-ghost" data-add-admin-user=""><i class="fa-solid fa-user-shield"></i> Add role record</button></article><article class="admin-card admin-card-wide"><h2>Data tools</h2><div class="admin-setting-actions"><button class="btn btn-ghost" data-export-all=""><i class="fa-solid fa-box-archive"></i> Export all data</button><button class="btn btn-ghost" data-check-health=""><i class="fa-solid fa-stethoscope"></i> Run system check</button></div><div data-system-health=""></div></article></div>
+</section>
+</section>
+</div>
+</section>
+<div class="admin-modal-backdrop" data-modal-backdrop="" hidden="">
+<section aria-labelledby="admin-modal-title" aria-modal="true" class="admin-modal" role="dialog">
+<button aria-label="Close" class="admin-modal-close" data-modal-close=""><i class="fa-solid fa-xmark"></i></button>
+<div data-modal-content=""></div>
+</section>
+</div>
+<div aria-live="polite" class="admin-toast-region" data-admin-toasts=""></div>
+</main>
+</body>
+</html>

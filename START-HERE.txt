@@ -1,0 +1,12 @@
+START HERE
+
+1. Import this repository into Netlify.
+2. Add every variable listed in .env.example to Netlify environment variables.
+3. Deploy the site once.
+4. Add /.netlify/functions/stripe-webhook as a Stripe webhook endpoint.
+5. Copy the Stripe webhook signing secret into Netlify and redeploy.
+6. Deploy the included Firestore rules and indexes.
+7. Test with Stripe test mode before replacing test keys with live keys.
+
+CUSTOMER PROMISE
+A fixed £25 deposit is paid to reserve the selected slot. It is not the full cleaning price. The actual service price is reviewed and communicated by the team before the clean, and the £25 deposit is taken into account when the final amount due is confirmed.
