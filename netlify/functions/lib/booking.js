@@ -92,6 +92,16 @@ function validateBooking(input = {}) {
   };
   booking.start = booking.time_slot.replace('-', ':');
   timeToMinutes(booking.start);
+  const rawPreferred = Array.isArray(input.preferred_time_slots)
+    ? input.preferred_time_slots
+    : [];
+  const preferred = [...new Set([booking.time_slot, ...rawPreferred]
+    .map((value) => clean(value, 80))
+    .filter(Boolean))]
+    .slice(0, 12);
+  preferred.forEach((slotId) => timeToMinutes(slotId.replace('-', ':')));
+  booking.preferred_time_slots = preferred;
+  booking.preferredStartTimes = preferred.map((slotId) => slotId.replace('-', ':'));
   const estimate = calculateTrustedEstimate(booking);
   booking.estimate = estimate.total;
   booking.estimatedHours = estimate.hours;
