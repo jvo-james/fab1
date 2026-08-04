@@ -729,67 +729,101 @@ body.nav-open:before{content:"";position:fixed;inset:0;background:rgba(12,30,10,
   }
 }
 
-/* Refined exact-time availability layout */
-@media (min-width: 901px) {
-  .booking-panel[data-step="2"] .calendar-layout {
-    grid-template-columns: minmax(420px, 0.9fr) minmax(520px, 1.25fr);
-    align-items: start;
-    gap: 24px;
-  }
 
-  .booking-panel[data-step="2"] .time-panel {
-    max-height: 680px;
-    overflow: auto;
-  }
-
-  .booking-panel[data-step="2"] .time-slot-list {
-    grid-template-columns: repeat(4, minmax(105px, 1fr));
-    gap: 10px;
-  }
-}
-
-.booking-panel[data-step="2"] .time-slot-list {
-  display: grid;
-}
-
-.booking-panel[data-step="2"] .time-slot span {
-  min-height: 72px;
-  place-content: center;
-  text-align: center;
-  gap: 4px;
-  padding: 12px 8px;
-}
-
-.booking-panel[data-step="2"] .time-slot b {
-  font-size: 0.86rem;
-}
-
-.booking-panel[data-step="2"] .time-slot small {
+/* Multi-select booking times: compact, responsive and overflow-safe */
+.booking-panel[data-step="2"] .time-panel h3 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem);
   line-height: 1.25;
 }
-
-/* Unavailable dates keep their grid position but are not displayed. */
-.booking-panel[data-step="2"] .calendar-day:disabled:not(.today) {
-  visibility: hidden;
+.booking-panel[data-step="2"] .time-flexible-copy {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink);
 }
-
-@media (max-width: 900px) {
-  .booking-panel[data-step="2"] .time-slot-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 9px;
+.booking-panel[data-step="2"] .time-primary-note {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.booking-panel[data-step="2"] .time-slot-list {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.65rem !important;
+  width: 100%;
+  min-width: 0;
+  overflow: visible !important;
+}
+.booking-panel[data-step="2"] .time-slot {
+  width: 100%;
+  min-width: 0;
+}
+.booking-panel[data-step="2"] .time-slot > span {
+  display: grid !important;
+  place-items: center;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 50px !important;
+  padding: 0.55rem 0.45rem !important;
+  border-radius: 12px !important;
+  box-sizing: border-box;
+  text-align: center;
+}
+.booking-panel[data-step="2"] .time-slot b {
+  font-size: 0.82rem !important;
+  line-height: 1 !important;
+}
+.booking-panel[data-step="2"] .time-slot small {
+  display: none !important;
+}
+.booking-panel[data-step="2"] .time-slot input:checked + span {
+  border-color: var(--green-700) !important;
+  background: var(--green-700) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 14px rgba(45, 120, 25, 0.18);
+}
+.booking-panel[data-step="2"] .calendar-layout,
+.booking-panel[data-step="2"] .calendar-card,
+.booking-panel[data-step="2"] .time-panel,
+.booking-panel[data-step="2"] [data-time-content] {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 900px) {
+  .booking-panel[data-step="2"] .calendar-layout {
+    grid-template-columns: minmax(430px, 1.05fr) minmax(360px, 0.95fr) !important;
   }
-
-  .booking-panel[data-step="2"] .time-slot span {
-    min-height: 64px;
+  .booking-panel[data-step="2"] .time-panel {
+    padding: 2rem !important;
+    overflow: hidden !important;
   }
-
-  .booking-panel[data-step="2"] .time-slot small {
-    display: none;
+  .booking-panel[data-step="2"] [data-time-content]:not([hidden]) {
+    display: block !important;
+    height: auto !important;
   }
 }
-
-@media (max-width: 430px) {
+@media (max-width: 1100px) and (min-width: 761px) {
   .booking-panel[data-step="2"] .time-slot-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 760px) {
+  .booking-panel[data-step="2"] .time-slot-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+  .booking-panel[data-step="2"] .time-slot > span {
+    min-height: 44px !important;
+    padding: 0.45rem 0.25rem !important;
+  }
+  .booking-panel[data-step="2"] .time-slot b {
+    font-size: 0.74rem !important;
+  }
+}
+@media (max-width: 420px) {
+  .booking-panel[data-step="2"] .time-slot-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
